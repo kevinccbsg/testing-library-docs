@@ -217,6 +217,7 @@ module.exports = {
         'ecosystem-rtl-simple-queries',
         'ecosystem-testing-library-selector',
         'ecosystem-cli-testing-library',
+        'ecosystem-twd-js',
       ],
     },
   ],

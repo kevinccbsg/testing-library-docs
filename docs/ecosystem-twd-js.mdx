@@ -1,0 +1,68 @@
+---
+id: ecosystem-twd-js
+title: twd-js
+---
+
+[`twd-js`][gh] is a companion library for `Testing Library` that runs your tests
+inside your dev server, in a real browser, rather than in a simulated DOM. It
+uses [`DOM Testing Library`][dom] queries and [`user-event`][user-event]
+directly, so the queries and interactions you already know work unchanged.
+
+```bash npm2yarn
+npm install --save-dev twd-js
+```
+
+```js
+import {twd, screenDom, userEvent} from 'twd-js'
+import {describe, it} from 'twd-js/runner'
+
+describe('Login', () => {
+  it('signs the user in', async () => {
+    await twd.visit('/login')
+
+    const user = userEvent.setup()
+    await user.type(screenDom.getByLabelText('Email:'), 'user@example.com')
+    await user.type(screenDom.getByLabelText('Password:'), 'password123')
+    await user.click(screenDom.getByRole('button', {name: /sign in/i}))
+
+    twd.should(await screenDom.findByText('Welcome back'), 'be.visible')
+  })
+})
+```
+
+`screenDom` is `screen` scoped to your app's root element, so queries don't
+match the `twd` sidebar. `screenDomGlobal` queries the whole document, for
+portals and modals.
+
+You can also call a framework wrapper's `render()` inside a `twd` test to mount
+a single component in the same real browser:
+
+```jsx
+import {render, screen, cleanup} from '@testing-library/react'
+import {describe, it, beforeEach} from 'twd-js/runner'
+import {twd} from 'twd-js'
+import {Greeting} from './Greeting'
+
+describe('Greeting', () => {
+  beforeEach(() => cleanup())
+
+  it('greets the user', () => {
+    render(<Greeting name="Ada" />)
+
+    twd.should(screen.getByRole('heading', {name: 'Hello, Ada'}), 'be.visible')
+  })
+})
+```
+
+Query with `screen` rather than `screenDom` here, because `render()` mounts
+outside the app root. The browser is not torn down between tests, so `cleanup()`
+is required. See [Component Testing](https://twd.dev/component-testing) for the
+full setup.
+
+- [twd-js on GitHub][gh]
+- [twd documentation][docs]
+
+[gh]: https://github.com/BRIKEV/twd
+[docs]: https://twd.dev
+[dom]: dom-testing-library/intro.mdx
+[user-event]: user-event/intro.mdx
